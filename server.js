@@ -1,8 +1,8 @@
-var sys = require('sys'), posix = require("fs"), http = require('http');
+var sys = require('sys'), http = require('http');
 // cache object to store results
-var cache = require('./cache');
+var cache = require('./cache/cache');
 var notFound = {};
-
+		
 var connections = 0;
 
 // stack managing the ids to request
@@ -34,6 +34,8 @@ http.createServer(function (req, res) {
              sendBody(200, JSON.stringify(stats), res);
             break;
         default:
+            sys.puts('connections:' + connections + ' stack:' + stack.length);
+
             // check if we have a argument
             if (typeof req.uri.params.id == 'undefined') {
                 res.sendHeader(500, {'Content-Type': 'text/plain'});
@@ -49,11 +51,15 @@ http.createServer(function (req, res) {
                 return;
             }
 
-            sys.puts('connections:' + connections + ' stack:' + stack.length);
 
             // we have a result, so 200 the client and send the result
             if (cache.exists(id)) {
-                workStack();
+		sys.puts(cache.getAge(id));
+                if (cache.getAge(id)>1000) {
+			sys.puts('entry to old'+id);
+			addToStack(id);
+		}
+		workStack();
                 sendBody(200, cache.get(id), res);
                 return;
             } else {
@@ -68,7 +74,11 @@ http.createServer(function (req, res) {
 }).listen(8000);
 
 
+/**
+ * Add a Id to the stack
+ */
 var addToStack = function(id) {
+    // check if the id is already in the stack
     if  (typeof stackSingle[id] != 'undefined') {
         return;
     }
@@ -76,15 +86,20 @@ var addToStack = function(id) {
     stack.push(id);
 }
 
-
+/**
+ * Get the next id from the stack 
+ */
 var getFromStack = function() {
     var loadId = stack.pop();
     delete stackSingle[loadId];
     return loadId;
 }
 
+/**
+ * Adds Connections to the webservice until maximum is reached 
+ */ 
 var workStack = function() {
-    if (connections < 20 && stack.length > 0) {
+    while (connections < 20 && stack.length > 0) {
         var loadId = getFromStack();
         // load the data
         getData(loadId);

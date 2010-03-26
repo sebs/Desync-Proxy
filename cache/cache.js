@@ -7,13 +7,13 @@
 var cache = exports;
 var cacheData = {};
 var cacheAge = {};
-
+var now = new Date();
 
 /**
  * Adds a Entry to the cache
  */
 exports.add = function(id, value) {
-    now = new Date();
+    var now = new Date();
     cacheData[id] = value;
     cacheAge[id] = now.getTime();
 }
@@ -23,6 +23,11 @@ exports.add = function(id, value) {
  */
 exports.get = function(id) {
     return cacheData[id];
+}
+
+exports.getAge = function(id) {
+	var now = new Date();
+	return now.getTime() - cacheAge[id];
 }
 
 /**
