@@ -1,8 +1,8 @@
 var sys = require('sys'), http = require('http');
 // cache object to store results
 var cache = require('./cache/cache');
+var config = require('./config');
 var notFound = {};
-		
 var connections = 0;
 
 // stack managing the ids to request
@@ -33,9 +33,10 @@ http.createServer(function (req, res) {
              }
              sendBody(200, JSON.stringify(stats), res);
             break;
+	case '/connections':
+	     sendBody(200, JSON.stringyfy({stack:stack.length,connections:connections}), res);
+	break;
         default:
-            sys.puts('connections:' + connections + ' stack:' + stack.length);
-
             // check if we have a argument
             if (typeof req.uri.params.id == 'undefined') {
                 res.sendHeader(500, {'Content-Type': 'text/plain'});
@@ -99,7 +100,7 @@ var getFromStack = function() {
  * Adds Connections to the webservice until maximum is reached 
  */ 
 var workStack = function() {
-    while (connections < 20 && stack.length > 0) {
+    while (connections < config.concurrency && stack.length > 0) {
         var loadId = getFromStack();
         // load the data
         getData(loadId);
@@ -123,9 +124,10 @@ var getData = function(id) {
 	return;
 	}
     // create a new client
-    var google = http.createClient(80, "127.0.0.1");
+	sys.puts(config.server);
+    var google = http.createClient(80, config.host);
     // doing a request
-    var request = google.request("GET", "/service/product.php?id="+id, {"host": "127.0.0.1"});
+    var request = google.request("GET", config.endpoint+id, {"host": config.host});
     connections++;
     // finish the request to the
     request.finish(function (response) {

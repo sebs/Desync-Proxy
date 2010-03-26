@@ -1,0 +1,43 @@
+Asyncrounous Proxy for REST Webservices
+
+This webserver caches webservices and controls the concurrency to the backend. 
+The cache state is communicated by http status codes to the clients. 
+The Format stored is JSON
+The following http status codes are handled
+
+- 200 The cache has a result in memory and returns 
+- 202 The request is not in cache but queued
+- 404 The entry was not found on the first request and will be pulled when next in queue
+- 500 The backend Sent a error or the server has an internal error
+
+This server should handle 200-400 requests/second regardless of the performance of the 
+backend, given a processor and enough ram to keep all the results.
+
+It is a cache, yes but one that will always answer YES ;) or to come later, but it will 
+never do something that delays the answer.
+
+Typical behaviour 
+
+$ wget http://localhost:8000/?id=1221
+--2010-03-26 21:22:00--  http://localhost:8000/?id=1221
+Auflösen des Hostnamen »localhost«.... 127.0.0.1, ::1
+Verbindungsaufbau zu localhost|127.0.0.1|:8000... verbunden.
+HTTP Anforderung gesendet, warte auf Antwort... 202 Accepted
+Länge: nicht spezifiziert [text/plain]
+In »index.html?id=1221« speichern.
+
+    [ <=>                                                                                                                                    ] 9           --.-K/s   in 0s      
+
+2010-03-26 21:22:00 (459 KB/s) - »index.html?id=1221« gespeichert [9]
+
+$ wget http://localhost:8000/?id=1221
+--2010-03-26 21:22:04--  http://localhost:8000/?id=1221
+Auflösen des Hostnamen »localhost«.... 127.0.0.1, ::1
+Verbindungsaufbau zu localhost|127.0.0.1|:8000... verbunden.
+HTTP Anforderung gesendet, warte auf Antwort... 200 OK
+Länge: nicht spezifiziert [text/plain]
+In »index.html?id=1221.1« speichern.
+
+    [ <=>                                                                                                                                    ] 310         --.-K/s   in 0s      
+
+
