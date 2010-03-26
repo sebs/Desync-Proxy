@@ -1,4 +1,4 @@
-Asyncrounous Proxy for REST Webservices
+Asyncronous Proxy for REST Webservices
 
 This webserver caches webservices and controls the concurrency to the backend. 
 The cache state is communicated by http status codes to the clients. 
@@ -13,7 +13,7 @@ The following http status codes are handled
 This server should handle 200-400 requests/second regardless of the performance of the 
 backend, given a processor and enough ram to keep all the results.
 
-It is a cache, yes but one that will always answer YES ;) or to come later, but it will 
+It is a cache, yes but one that will always answer YES ;) or tells you to come later, but it will 
 never do something that delays the answer.
 
 Typical behaviour 
